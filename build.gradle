@@ -30,11 +30,23 @@ android {
     sourceSets {
         main {
             java {
-                exclude "com/bear/libstorage/Test.java"
-                exclude "com/bear/libstorage/TestObj.java"
+                println(">>>>> isRelease:" + isReleaseBuildType()) //打印日志
+                if (isReleaseBuildType()) {
+                    exclude "com/bear/libstorage/Test.java"
+                    exclude "com/bear/libstorage/TestObj.java"
+                }
             }
         }
     }
+}
+
+boolean isReleaseBuildType() {
+    for (String s : gradle.startParameter.taskNames) {
+        if (s.contains("Release") | s.contains("release")) {
+            return true
+        }
+    }
+    return false
 }
 
 dependencies {
