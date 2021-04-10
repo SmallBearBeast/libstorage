@@ -61,11 +61,19 @@ class InternalUtil {
         return dirFile.exists() || dirFile.mkdirs();
     }
 
+    static boolean isFileExist(String path) {
+        return isFileExist(new File(path));
+    }
+
+    static boolean isFileExist(File file) {
+        return file != null && file.exists();
+    }
+
     static String toJson(Object jsonObj){
         return new GsonBuilder().serializeNulls().create().toJson(jsonObj);
     }
 
-    static <T> T toObj(String json, TypeToken token){
+    static <T> T toObj(String json, TypeToken<T> token){
         if(token.getType() == String.class) {
             return (T) json;
         }
@@ -86,7 +94,7 @@ class InternalUtil {
         }
     }
 
-    public static void close(Closeable... closeables) {
+    static void close(Closeable... closeables) {
         if (closeables == null) {
             return;
         }
@@ -95,4 +103,12 @@ class InternalUtil {
         }
     }
     /**安全关闭流，内部捕获异常**/
+
+    static boolean delete(String filePath) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            return file.delete();
+        }
+        return true;
+    }
 }

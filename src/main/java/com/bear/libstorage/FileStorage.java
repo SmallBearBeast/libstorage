@@ -13,6 +13,15 @@ import java.nio.charset.StandardCharsets;
 public class FileStorage {
     private static final int BUFFER_SIZE = 4096;
 
+    public static boolean writeObjToJson(String path, Object object) {
+        return writeStr(path, InternalUtil.toJson(object));
+    }
+
+    public static boolean writeStr(String path, String str) {
+        byte[] buffer = str.getBytes(StandardCharsets.UTF_8);
+        return writeStream(path, new ByteArrayInputStream(buffer));
+    }
+
     public static boolean writeStream(String path, InputStream inputStream) {
         if (!InternalUtil.createFile(path)) {
             return false;
@@ -29,32 +38,40 @@ public class FileStorage {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
+            InternalUtil.delete(path);
         } finally {
             InternalUtil.close(fos);
         }
         return false;
     }
 
-    public static boolean writeObjToJson(String path, Object object) {
-        if (!InternalUtil.createFile(path)) {
-            return false;
+    public static <T> T readObjFromJson(String path, TypeToken<T> token) {
+        try{
+            return InternalUtil.toObj(readStr(path), token);
+        } catch (Exception e) {
+            e.printStackTrace();
+            InternalUtil.delete(path);
         }
-        return writeStr(path, InternalUtil.toJson(object));
+        return null;
     }
 
-    public static boolean writeStr(String path, String str) {
-        if (!InternalUtil.createFile(path)) {
-            return false;
-        }
-        byte[] buffer = str.getBytes(StandardCharsets.UTF_8);
-        return writeStream(path, new ByteArrayInputStream(buffer));
+    public static String readStr(String path) {
+        // No need to close.
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        readStream(path, new StreamCallback() {
+            @Override
+            public void success(byte[] data, int read) {
+                baos.write(data, 0, read);
+            }
+        });
+        return baos.toString();
     }
 
     public static void readStream(String path, StreamCallback streamCallback) {
         if (streamCallback == null) {
             return;
         }
-        if (!InternalUtil.createFile(path)) {
+        if (!InternalUtil.isFileExist(path)) {
             return;
         }
         FileInputStream fis = null;
@@ -68,30 +85,9 @@ public class FileStorage {
         } catch (Exception e) {
             e.printStackTrace();
             streamCallback.fail();
+            InternalUtil.delete(path);
         } finally {
             InternalUtil.close(fis);
         }
-    }
-
-    public static <T> T readObjFromJson(String path, TypeToken<T> token) {
-        if (!InternalUtil.createFile(path)) {
-            return null;
-        }
-        return InternalUtil.toObj(readStr(path), token);
-    }
-
-    public static String readStr(String path) {
-        if (!InternalUtil.createFile(path)) {
-            return null;
-        }
-        // No need to close.
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        readStream(path, new StreamCallback() {
-            @Override
-            public void success(byte[] data, int read) {
-                baos.write(data, 0, read);
-            }
-        });
-        return baos.toString();
     }
 }
