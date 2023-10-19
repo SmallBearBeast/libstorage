@@ -28,7 +28,7 @@ public class FileStorage {
         }
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(new File(path));
+            fos = new FileOutputStream(path);
             byte[] buffer = new byte[BUFFER_SIZE];
             int read = 0;
             while ((read = inputStream.read(buffer, 0, buffer.length)) != -1) {
