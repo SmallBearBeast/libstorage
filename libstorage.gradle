@@ -40,13 +40,22 @@ android {
     }
 }
 
+// 直接判断 BuildType 名称
 boolean isReleaseBuildType() {
     for (String s : gradle.startParameter.taskNames) {
-        if (s.contains("Release") | s.contains("release")) {
+        if (s.contains("Release") || s.contains("release")) {
             return true
         }
     }
     return false
+    // 根据 BuildType 判断
+//    if (project.hasProperty("android.injected.build.model.only")) {
+//        // Debug 构建
+//        println("Debug Build")
+//    } else {
+//        // Release 构建
+//        println("Release Build")
+//    }
 }
 
 dependencies {
